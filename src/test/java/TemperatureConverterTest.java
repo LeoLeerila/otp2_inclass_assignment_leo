@@ -2,7 +2,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-import ic1.TemperatureConverter;
+import ic.TemperatureConverter;
 
 public class TemperatureConverterTest {
     private final TemperatureConverter temperatureConverter = new TemperatureConverter();

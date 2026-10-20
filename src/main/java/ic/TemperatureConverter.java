@@ -1,10 +1,17 @@
-package ic1;
+package ic;
 
 import java.util.Scanner;
 
 public class TemperatureConverter {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
+        //prompt user for localization
+        System.out.println("enter a number");
+
+        //load localization
+
+
+        //user input for temperature calculation
         System.out.println("enter a number");
         double a = sc.nextDouble();
         sc.close();
