@@ -8,14 +8,14 @@ pipeline {
     environment {
         //PATH = "C:\\Program Files\\Docker\\Docker\\resources\\bin;${env.PATH}"
         DOCKERHUB_CREDENTIALS_ID = 'Docker_pat'
-        DOCKERHUB_REPO = 'leoleerila/otp1'
+        DOCKERHUB_REPO = 'leoleerila/otp2'
         DOCKER_IMAGE_TAG = 'v1'
     }
 
     stages {
         stage ('check'){
             steps{
-                git branch: 'main', url: 'https://github.com/LeoLeerila/otp1_inclass1_assignment_leo.git'
+                git branch: 'main', url: 'https://github.com/LeoLeerila/otp2_inclass_assignment_leo.git'
             }
         }
         stage ('build'){
