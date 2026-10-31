@@ -32,18 +32,33 @@ public class Main extends Application {
 
     private final TemperatureDAO TemperatureDAO = new TemperatureDAO();
 
+    private ComboBox<String> languageComboBox;
+    private Language language = new Language();
     private TextField originalDegreeField;
     private TextField convertedDegreeField;
     private ComboBox<TemperatureType> originalTypeComboBox;
     private ComboBox<TemperatureType> convertedTypeComboBox;
     private Label resultLabel;
     private TableView<Temperature> tableView;
+    private GridPane form;
+    private Button calcButton;
+    private VBox root;
+    private Label originalTypeLabel;
+    private Label originalDegreeLabel;
+    private Label convertedTypeLabel;
 
     @Override
     public void start(Stage stage) {
-        stage.setTitle("Temperature Converter");
+        //load localization
+        languageComboBox = new ComboBox<>();
+        languageComboBox.getItems().addAll(language.getLocaleStrings());
+        languageComboBox.getSelectionModel().selectFirst();
+        languageComboBox.setOnAction(e -> handleLocaleChange(languageComboBox.getValue(), stage));
+        language.setLocaleById(0);
 
-        GridPane form = new GridPane();
+        stage.setTitle(language.getResource("title"));
+
+        form = new GridPane();
         form.setHgap(10);
         form.setVgap(10);
         form.setPadding(new Insets(15));
@@ -54,14 +69,18 @@ public class Main extends Application {
         convertedTypeComboBox = new ComboBox<>();
         loadTemperatures();
 
-        Button calcButton = new Button("Calculate & Save");
+        calcButton = new Button(language.getResource("calc"));
         resultLabel = new Label();
 
-        form.add(new Label("Temperature Unit:"), 0, 0);
+        originalTypeLabel = new Label(language.getResource("originalType"));
+        originalDegreeLabel = new Label(language.getResource("degree"));
+        convertedTypeLabel = new Label(language.getResource("convertedType"));
+
+        form.add(originalTypeLabel, 0, 0);
         form.add(originalTypeComboBox, 1, 0);
-        form.add(new Label("Temperature degree:"), 0, 1);
+        form.add(originalDegreeLabel, 0, 1);
         form.add(originalDegreeField, 1, 1);
-        form.add(new Label("Conversion Unit:"), 0, 2);
+        form.add(convertedTypeLabel, 0, 2);
         form.add(convertedTypeComboBox, 1, 2);
         form.add(calcButton, 1, 3);
         form.add(resultLabel, 1, 4);
@@ -71,7 +90,7 @@ public class Main extends Application {
 
         calcButton.setOnAction(e -> handleCalculateAndSave());
 
-        VBox root = new VBox(15, form, new Label("Saved Records:"), tableView);
+        root = new VBox(15, languageComboBox, form, new Label(language.getResource("saved")), tableView);
         root.setPadding(new Insets(15));
         root.setAlignment(Pos.TOP_LEFT);
 
@@ -89,7 +108,7 @@ public class Main extends Application {
                 convertedTypeComboBox.getSelectionModel().selectFirst();
             }
         } catch (SQLException e) {
-            showError("Failed to load degree types: " + e.getMessage());
+            showError(language.getResource("errLoad") + e.getMessage());
         }
     }
 
@@ -101,7 +120,7 @@ public class Main extends Application {
             String convertedSelectedType = convertedTypeComboBox.getValue().getTypeName().toString();
 
             if (originalSelectedType == null || convertedSelectedType == null) {
-                showError("Please select degree types.");
+                showError(language.getResource("errSelectTypes"));
                 return;
             }
 
@@ -119,12 +138,12 @@ public class Main extends Application {
             } else {
                 System.out.println(originalSelectedType + " == " + C + " " + (originalSelectedType == C));
                 System.out.println(originalSelectedType.getClass().getName() + " " + C.getClass().getName());
-                showError("bad combo");
+                showError(language.getResource("errBadCombo"));
                 return;
             }
 
             //double time = TemperatureConverter.timeCal(speed, distance);
-            resultLabel.setText(String.format("Temperature: %.2f", convertedDegree));
+            resultLabel.setText(String.format(language.getResource("result") + " %.2f", convertedDegree));
 
             Boolean extreme = false;
             if (originalSelectedType != C && convertedSelectedType == C) {
@@ -142,33 +161,33 @@ public class Main extends Application {
             convertedDegreeField.clear();
 
         } catch (NumberFormatException ex) {
-            showError("Temperature degree must be numeric.");
+            showError(language.getResource("errOriginalTemp"));
         } catch (IllegalArgumentException ex) {
             showError(ex.getMessage());
         } catch (SQLException ex) {
-            showError("Database error: " + ex.getMessage());
+            showError(language.getResource("errDB") + ex.getMessage());
         }
     }
 
     private TableView<Temperature> buildTableView() {
         TableView<Temperature> table = new TableView<>();
 
-        TableColumn<Temperature, Number> idCol = new TableColumn<>("ID");
+        TableColumn<Temperature, Number> idCol = new TableColumn<>(language.getResource("tableID"));
         idCol.setCellValueFactory(data -> new javafx.beans.property.SimpleIntegerProperty(data.getValue().getId()));
 
-        TableColumn<Temperature, String> originalTypeCol = new TableColumn<>("Original Type");
+        TableColumn<Temperature, String> originalTypeCol = new TableColumn<>(language.getResource("tableOType"));
         originalTypeCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getOriginalType()));
 
-        TableColumn<Temperature, Number> originalDegreeCol = new TableColumn<>("Original Degree");
+        TableColumn<Temperature, Number> originalDegreeCol = new TableColumn<>(language.getResource("tableODegree"));
         originalDegreeCol.setCellValueFactory(data -> new javafx.beans.property.SimpleDoubleProperty(data.getValue().getOriginalDegree()));
 
-        TableColumn<Temperature, String> convertedTypeCol = new TableColumn<>("Converted Type");
+        TableColumn<Temperature, String> convertedTypeCol = new TableColumn<>(language.getResource("tableCType"));
         convertedTypeCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getConvertedType()));
 
-        TableColumn<Temperature, Number> convertedDegreeCol = new TableColumn<>("Converted Degree");
+        TableColumn<Temperature, Number> convertedDegreeCol = new TableColumn<>(language.getResource("tableCDegree"));
         convertedDegreeCol.setCellValueFactory(data -> new javafx.beans.property.SimpleDoubleProperty(data.getValue().getConvertedDegree()));
 
-        TableColumn<Temperature, Boolean> extremeCol = new TableColumn<>("Extreme");
+        TableColumn<Temperature, Boolean> extremeCol = new TableColumn<>(language.getResource("tableExtreme"));
         extremeCol.setCellValueFactory(data -> new javafx.beans.property.SimpleBooleanProperty(data.getValue().getExtreme()));
 
         table.getColumns().addAll(idCol, originalTypeCol, originalDegreeCol, convertedTypeCol, convertedDegreeCol, extremeCol);
@@ -180,13 +199,57 @@ public class Main extends Application {
             List<Temperature> records = TemperatureDAO.getHistory();
             tableView.getItems().setAll(records);
         } catch (SQLException e) {
-            showError("Failed to load records: " + e.getMessage());
+            showError(language.getResource("errLoadRecords") + e.getMessage());
         }
     }
 
     private void showError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR, message);
         alert.showAndWait();
+    }
+
+    private void handleLocaleChange(String Locale, Stage stage) {
+        language.setLocaleByName(Locale);
+        stage.setTitle(language.getResource("title"));
+        System.out.println(language.getResource("title"));
+        form = new GridPane();
+        form.setHgap(10);
+        form.setVgap(10);
+        form.setPadding(new Insets(15));
+
+        originalDegreeField = new TextField();
+        convertedDegreeField = new TextField();
+        originalTypeComboBox = new ComboBox<>();
+        convertedTypeComboBox = new ComboBox<>();
+        loadTemperatures();
+
+        calcButton = new Button(language.getResource("calc"));
+        resultLabel = new Label();
+
+        originalTypeLabel = new Label(language.getResource("originalType"));
+        originalDegreeLabel = new Label(language.getResource("degree"));
+        convertedTypeLabel = new Label(language.getResource("convertedType"));
+
+        form.add(originalTypeLabel, 0, 0);
+        form.add(originalTypeComboBox, 1, 0);
+        form.add(originalDegreeLabel, 0, 1);
+        form.add(originalDegreeField, 1, 1);
+        form.add(convertedTypeLabel, 0, 2);
+        form.add(convertedTypeComboBox, 1, 2);
+        form.add(calcButton, 1, 3);
+        form.add(resultLabel, 1, 4);
+
+        tableView = buildTableView();
+        loadRecords();
+
+        calcButton.setOnAction(e -> handleCalculateAndSave());
+
+        root = new VBox(15, languageComboBox, form, new Label(language.getResource("saved")), tableView);
+        root.setPadding(new Insets(15));
+        root.setAlignment(Pos.TOP_LEFT);
+
+        stage.setScene(new Scene(root, 500, 500));
+        stage.show();
     }
 
     public static void main(String[] args) {

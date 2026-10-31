@@ -47,7 +47,6 @@ public class DB {
         ResultSet dbSet = conn.getMetaData().getCatalogs();
         // Iterate each catalog in the ResultSet
         while (dbSet.next()) {
-            System.out.println(dbSet.getString(1));
             // Get the database name, which is at position 1
             if (dbSet.getString(1).contains(DATABASE)) {
                 dbExists = true;
