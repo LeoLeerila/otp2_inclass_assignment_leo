@@ -27,6 +27,17 @@ public class DB {
         return conn;
     }
 
+    public static boolean ensureDBExists() throws SQLException {
+        boolean hasDB = checkDBExists(DriverManager.getConnection(URL, USER, PASSWORD));
+        
+        if (!hasDB) {
+            System.out.println("no database found, creating new database");
+            createDB();
+        }
+
+        return hasDB;
+    }
+
     private static boolean checkDBExists(Connection conn) throws SQLException {
         boolean dbExists = false;
 
@@ -36,13 +47,14 @@ public class DB {
         ResultSet dbSet = conn.getMetaData().getCatalogs();
         // Iterate each catalog in the ResultSet
         while (dbSet.next()) {
-        // Get the database name, which is at position 1
-        if (dbSet.getString(1) == DATABASE) {
-            dbExists = true;
-        }
+            System.out.println(dbSet.getString(1));
+            // Get the database name, which is at position 1
+            if (dbSet.getString(1).contains(DATABASE)) {
+                dbExists = true;
+            }
         }
         dbSet.close();
-        
+
         return dbExists;
     }
 
@@ -52,12 +64,42 @@ public class DB {
         try {
             BufferedReader reader = new BufferedReader(new FileReader("icdb.sql"));
             Statement rootStatement = rootConnection.createStatement();
+            StringBuilder builder = new StringBuilder();
 
             String line;
             while ((line = reader.readLine()) != null) {
-                rootStatement.execute(line);
+                line = line.trim();
+
+                // Skip empty lines and single-line comments.
+                if (line.isEmpty() || line.startsWith("--"))
+                    continue;
+
+                builder.append(line);
+                if (line.endsWith(";"))
+                try {
+                    // Execute the SQL command
+                    rootStatement.execute(builder.toString());
+                    // Print a success message along with
+                    // the first 15 characters of the
+                    // executed command.
+                    System.out.println(
+                        " Command successfully executed : "
+                        + builder.substring(
+                            0,
+                            Math.min(builder.length(), 15))
+                        + "...");
+                    builder.setLength(0);
+                }
+                catch (SQLException e) {
+                    // If an SQLException occurs during
+                    // execution, print an error message and
+                    // stop further execution.
+                    System.err.println(e.getMessage() + "\n");
+                }
             }
             reader.close();
+
+            rootStatement.execute(builder.toString());
 
             boolean dbCreated = checkDBExists(rootConnection);
             if (dbCreated) {

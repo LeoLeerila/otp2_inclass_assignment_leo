@@ -21,3 +21,6 @@ CREATE TABLE degree_type
   PRIMARY KEY (id)
 );
 
+INSERT INTO `degree_type` (`type_name`) VALUES ('C');
+INSERT INTO `degree_type` (`type_name`) VALUES ('F');
+INSERT INTO `degree_type` (`type_name`) VALUES ('K');

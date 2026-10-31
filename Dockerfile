@@ -17,4 +17,8 @@ RUN mkdir -p /javafx-sdk \
     && rm -rf /javafx-sdk/javafx-sdk-21 javafx.zip
 
 RUN mvn package
-CMD ["java", "-jar", "target/otp2_inclass_assignment_leo-1.0-SNAPSHOT.jar" ]
+CMD ["java", \
+     "--module-path", "/javafx-sdk/lib", \
+     "--add-modules", "javafx.controls,javafx.fxml", \
+     "-Dprism.order=sw", \
+     "-jar", "target/otp2_inclass_assignment_leo-1.0-SNAPSHOT.jar"]

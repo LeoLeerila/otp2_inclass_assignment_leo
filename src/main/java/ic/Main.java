@@ -11,6 +11,7 @@ import javafx.stage.Stage;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class Main extends Application {
     /*public static void main(String[] args) {
@@ -126,9 +127,9 @@ public class Main extends Application {
             resultLabel.setText(String.format("Temperature: %.2f", convertedDegree));
 
             Boolean extreme = false;
-            if (originalSelectedType != "C" && convertedSelectedType == "C") {
+            if (originalSelectedType != C && convertedSelectedType == C) {
                     extreme = TemperatureConverter.isExtremeTemperature(convertedDegree);
-            } else if (originalSelectedType == "C" && convertedSelectedType != "C") {
+            } else if (originalSelectedType == C && convertedSelectedType != C) {
                 extreme = TemperatureConverter.isExtremeTemperature(originalDegree);
             }
             
@@ -189,6 +190,14 @@ public class Main extends Application {
     }
 
     public static void main(String[] args) {
+        try {
+            while (!DB.ensureDBExists()) {
+                TimeUnit.SECONDS.sleep(1);
+            }
+        } catch (Exception e) {
+            // TODO: handle exception
+            System.out.println(e);
+        }
         launch(args);
     }
 }
